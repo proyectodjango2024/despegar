@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Resultados - Despegar</title>
+
+    <!-- Litepicker CSS (cargado antes de tu CSS para no sobreescribir) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/litepicker/dist/css/litepicker.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+
+    <style>
+        /* --- COPIO TODO el CSS del index tal cual (para que se vea exactamente igual) --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5; }
+
+        /* Header */
+        .header { background: linear-gradient(135deg, #6b46c1 0%, #3b1a8c 100%); color: white; padding: 12px 20px; }
+        .header-top { display:flex; justify-content:space-between; align-items:center; max-width:1200px; margin:0 auto; }
+        .logo { font-size:28px; font-weight:bold; color:white; }
+        .header-info { display:flex; align-items:center; gap:30px; font-size:14px; }
+        .header-info span { display:flex; align-items:center; gap:5px; }
+        .header-right { display:flex; align-items:center; gap:20px; }
+        .benefits { background: rgba(255,255,255,0.1); padding:8px 12px; border-radius:6px; font-size:12px; }
+        .user-icon { background: rgba(255,255,255,0.2); width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+        .cart { display:flex; align-items:center; gap:5px; font-size:14px; }
+
+        /* Navigation */
+        .nav-menu { display:flex; justify-content:center; gap:40px; margin-top:20px; max-width:1200px; margin-left:auto; margin-right:auto; }
+        .nav-item { display:flex; flex-direction:column; align-items:center; gap:8px; padding:10px 15px; border-radius:8px; transition:all 0.3s ease; cursor:pointer; text-decoration:none; color:#374151; }
+        .nav-item.active { background: rgba(255,255,255,0.2); }
+        .nav-item:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+        .nav-icon { width:32px; height:32px; background: rgba(255,255,255,0.3); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+        .nav-item.active .nav-icon { background:white; color:#6b46c1; }
+
+        /* Main Content */
+        .main-content { background: linear-gradient(135deg, #6b46c1 0%, #3b1a8c 100%); padding:40px 20px 60px; position:relative; overflow:hidden; }
+        .floating-elements { position:absolute; top:0; left:0; right:0; bottom:0; pointer-events:none; overflow:hidden; }
+        .balloon { position:absolute; border-radius:50%; background: linear-gradient(45deg, rgba(147,51,234,0.8), rgba(168,85,247,0.6)); animation: float 6s ease-in-out infinite; }
+        .balloon1 { width:120px; height:140px; top:10%; left:5%; border-radius:50% 50% 50% 50% / 60% 60% 40% 40%; animation-delay:0s; }
+        .balloon2 { width:80px; height:95px; top:20%; right:15%; border-radius:50% 50% 50% 50% / 60% 60% 40% 40%; animation-delay:2s; }
+        .anniversary-text { position:absolute; right:10%; top:30%; color:white; font-size:48px; font-weight:bold; text-shadow:2px 2px 4px rgba(0,0,0,0.3); transform: rotate(-15deg); }
+        @keyframes float { 0%,100% { transform: translateY(0px) rotate(0deg);} 50% { transform: translateY(-20px) rotate(5deg);} }
+
+        .search-container { max-width:1200px; margin:0 auto; position:relative; z-index:10; }
+        .page-title { color:white; font-size:32px; font-weight:bold; margin-bottom:30px; }
+        .search-form { background:white; border-radius:12px; padding:25px; box-shadow:0 8px 32px rgba(0,0,0,0.1); display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto; gap:15px; align-items:end; }
+        .form-group { display:flex; flex-direction:column; }
+        .form-label { color:#666; font-size:12px; font-weight:600; margin-bottom:5px; text-transform:uppercase; }
+        .form-input { border:2px solid #e5e7eb; border-radius:8px; padding:12px 15px; font-size:16px; transition:border-color 0.3s ease; }
+        .form-input:focus { outline:none; border-color:#6b46c1; }
+        .swap-btn { background:#6b46c1; color:white; border:none; border-radius:50%; width:35px; height:35px; cursor:pointer; margin:0 10px; align-self:center; transition:all 0.3s ease; }
+        .swap-btn:hover { background:#553c9a; transform:rotate(180deg); }
+        .search-btn { background:#ef4444; color:white; border:none; border-radius:8px; padding:15px 25px; font-size:16px; font-weight:bold; cursor:pointer; transition:all 0.3s ease; display:flex; align-items:center; gap:8px; }
+        .search-btn:hover { background:#dc2626; transform:translateY(-2px); box-shadow:0 4px 12px rgba(239,68,68,0.3); }
+        .options-row { grid-column:1 / -1; display:flex; gap:20px; margin-top:10px; color:#6b46c1; font-size:14px; }
+        .option-link { display:flex; align-items:center; gap:5px; color:#6b46c1; text-decoration:none; font-weight:500; transition:color 0.3s ease; }
+        .option-link:hover { color:#553c9a; }
+
+        /* Promotional Cards */
+        .promo-section { max-width:1200px; margin:-30px auto 0; padding:0 20px; position:relative; z-index:5; }
+        .promo-grid { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:20px; }
+        .promo-card { border-radius:12px; overflow:hidden; box-shadow:0 8px 32px rgba(0,0,0,0.1); transition:all 0.3s ease; cursor:pointer; padding:30px 25px; color:white; }
+        .promo-card:hover { transform:translateY(-5px); box-shadow:0 12px 40px rgba(0,0,0,0.15); }
+        .promo-card.coupons { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+        .promo-card.caribbean { background: linear-gradient(135deg, #6b46c1 20%, #3b1a8c 100%); position:relative; }
+        .promo-card.discount { background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%); }
+        .promo-card.brazil { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); position:relative; }
+        .promo-title { font-size:24px; font-weight:bold; margin-bottom:10px; }
+        .promo-subtitle { font-size:14px; opacity:0.9; margin-bottom:20px; }
+        .promo-amount { font-size:36px; font-weight:bold; margin:15px 0; }
+        .promo-discount-text { font-size:18px; font-weight:600; }
+        .promo-btn { background: rgba(255,255,255,0.2); color: white; border:2px solid rgba(255,255,255,0.3); padding:12px 24px; border-radius:25px; font-weight:bold; cursor:pointer; transition:all 0.3s ease; display:inline-block; text-decoration:none; margin-top:15px; }
+        .promo-btn:hover { background: rgba(255,255,255,0.3); border-color: rgba(255,255,255,0.5); }
+        .gift-icon { position:absolute; right:20px; top:50%; transform:translateY(-50%); font-size:48px; opacity:0.3; }
+        .coupon-code { background: rgba(255,255,255,0.2); padding:8px 16px; border-radius:20px; font-size:14px; font-weight:bold; display:inline-block; margin-top:10px; }
+        .flag-icon { position:absolute; right:20px; bottom:20px; width:40px; height:30px; border-radius:4px; }
+        .flag-brazil { background: linear-gradient(to bottom, #009739 0%, #009739 33%, #fedf00 33%, #fedf00 66%, #009739 66%); }
+
+        /* Autocomplete Styles */
+        .autocomplete-container { position:relative; }
+        .suggestions { position:absolute; top:100%; left:0; right:0; background:white; border:1px solid #e5e7eb; border-top:none; border-radius:0 0 8px 8px; max-height:200px; overflow-y:auto; z-index:1000; box-shadow:0 4px 12px rgba(0,0,0,0.1); display:none; }
+        .suggestions.show { display:block; }
+        .suggestion-item { padding:12px 15px; cursor:pointer; border-bottom:1px solid #f3f4f6; transition:background-color 0.2s ease; display:flex; align-items:center; gap:10px; }
+        .suggestion-item:hover, .suggestion-item.highlighted { background-color:#f8fafc; }
+        .city-info { display:flex; flex-direction:column; }
+        .city-name { font-weight:600; color:#1f2937; }
+        .city-country { font-size:12px; color:#6b7280; }
+        .city-icon { width:24px; height:24px; border-radius:4px; display:flex; align-items:center; justify-content:center; background:#e5e7eb; font-size:12px; }
+        .form-input.with-suggestions { border-radius:8px 8px 0 0; }
+        .form-input.with-suggestions:focus { border-radius:8px 8px 0 0; }
+        .no-results { padding:12px 15px; color:#6b7280; font-style:italic; text-align:center; }
+
+        /* Responsive */
+        @media (max-width:768px) {
+            .header-info { display:none; }
+            .nav-menu { grid-template-columns: repeat(auto-fit,minmax(80px,1fr)); gap:10px; }
+            .search-form { grid-template-columns:1fr; gap:15px; }
+            .promo-grid { grid-template-columns:1fr; }
+            .anniversary-text { font-size:24px; right:5%; }
+        }
+
+        /* minimal counter button */
+        .counter-row { display:flex; justify-content:space-between; align-items:center; margin:8px 0; }
+        .btn-minus, .btn-plus { border:1px solid #aaa; background:#fff; width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:16px; line-height:26px; }
+
+        /* Header white variant (kept as in index) */
+        .header { background:#ffffff; color:#1f2937; padding:12px 20px; border-bottom:1px solid #e5e7eb; }
+        .logo { font-size:28px; font-weight:bold; color:#6b46c1; }
+        .header-info { display:flex; align-items:center; gap:30px; font-size:14px; color:#374151; }
+        .header-right { display:flex; align-items:center; gap:20px; color:#374151; }
+        .benefits { background: rgba(107,70,193,0.1); color:#6b46c1; padding:8px 12px; border-radius:6px; font-size:12px; }
+        .user-icon { background:#f3f4f6; color:#374151; width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+        .cart { color:#374151; }
+
+        .nav-icon { background:#f3f4f6; color:#6b46c1; }
+        .nav-item.active .nav-icon { background:#6b46c1; color:white; }
+        .logo img { height:40px; }
+
+        /* Footer */
+        .footer { background:#fff; padding:40px 20px; border-top:1px solid #e5e7eb; margin-top:60px; font-size:14px; color:#374151; }
+        .footer h4 { font-weight:bold; margin-bottom:12px; }
+        .footer-container { max-width:1200px; margin:0 auto; }
+        .footer-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:30px; margin-bottom:40px; }
+        .footer select { margin-top:8px; padding:6px 10px; border:1px solid #ccc; border-radius:6px; }
+        .footer-logos { display:flex; justify-content:center; gap:50px; margin-bottom:30px; }
+        .footer-logos img { height:50px; }
+        .footer-legal { font-size:12px; color:#6b7280; line-height:1.6; text-align:center; }
+
+        /* Modal (same as index) */
+        .ds-modal { display:none; position:fixed; inset:0; z-index:2000; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; }
+        .ds-modal__box { background:#fff; padding:24px; border-radius:12px; width:92%; max-width:420px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.2); }
+        .ds-modal__title { color:#6b46c1; font-size:20px; margin-bottom:8px; }
+        .ds-modal__text { color:#374151; margin-bottom:18px; }
+        .ds-btn { background:#6b46c1; color:#fff; padding:10px 16px; border-radius:8px; border:none; cursor:pointer; font-weight:600; }
+        .ds-btn--ghost { background:transparent; color:#374151; border:1px solid #e5e7eb; margin-left:8px; }
+        .ds-close { position:absolute; right:18px; top:18px; font-size:18px; background:transparent; border:none; cursor:pointer; color:#374151; }
+
+        /* --- NUEVAS reglas para la grilla de resultados (estéticas y responsivas) --- */
+        .results-container { margin-top:24px; background: #fff; border-radius: 12px; padding: 18px; box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+        .results-header { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; flex-wrap:wrap; }
+        .results-header .summary { font-weight:600; color:#111827; }
+        .results-grid { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:14px; }
+        .flight-card { background:#ffffff; border:1px solid #e6e6e6; border-radius:10px; padding:14px; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+        .flight-left { display:flex; gap:12px; align-items:center; }
+        .airline-logo { width:52px; height:52px; border-radius:8px; background:#f3f4f6; display:flex; align-items:center; justify-content:center; font-weight:700; color:#6b46c1; }
+        .flight-info h3 { font-size:16px; margin-bottom:6px; color:#111827; }
+        .flight-info p { font-size:13px; color:#6b7280; }
+        .flight-right { display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+        .flight-price { font-size:18px; font-weight:700; color:#111827; }
+        .btn-reserve { background:#6b46c1; color:#fff; padding:8px 12px; border-radius:8px; border:none; cursor:pointer; }
+        @media (max-width:900px) { .results-grid { grid-template-columns:1fr 1fr; } }
+        @media (max-width:600px) { .results-grid { grid-template-columns:1fr; } .search-form { grid-template-columns:1fr; } }
+    </style>
+
+</head>
+<body>
+    <!-- Header (copiado EXACTO) -->
+        <header class="header">
+        <div class="header-top">
+            <div class="logo">
+            <a href="Despegar.html">
+                <img src="img/logo.png" alt="Despegar">
+            </a>
+            </div>
+
+
+            <div class="header-info">
+                <span>📞 Ventas 01 800 518 9327</span>
+                <span>🏠 Publica tu alojamiento</span>
+                <span>❓ Ayuda</span>
+                <span>✈️ Mis Viajes</span>
+            </div>
+
+            <div class="header-right">
+                <div class="benefits">
+                    Beneficios Pasaporte<br>
+                    <small>Cupones, puntos y más.</small>
+                </div>
+                <div class="user-icon">👤</div>
+                <div class="cart">🛒 Carrito</div>
+            </div>
+        </div>
+
+        <nav class="nav-menu">
+            <a href="#" class="nav-item" data-restricted="true">
+                <div class="nav-icon">🏨</div>
+                <span>Alojamientos</span>
+            </a>
+
+            <a href="#" class="nav-item active">
+                <div class="nav-icon">✈️</div>
+                <span>Vuelos</span>
+            </a>
+
+            <a href="#" class="nav-item" data-restricted="true">
+                <div class="nav-icon">📦</div>
+                <span>Paquetes</span>
+            </a>
+
+            <a href="#" class="nav-item" data-restricted="true">
+                <div class="nav-icon">💎</div>
+                <span>Ofertas</span>
+            </a>
+
+            <a href="#" class="nav-item" data-restricted="true">
+                <div class="nav-icon">🎯</div>
+                <span>Circuitos</span>
+            </a>
+
+            <a href="#" class="nav-item" data-restricted="true">
+                <div class="nav-icon">🏃</div>
+                <span>Alquileres</span>
+            </a>
+
+            <a href="#" class="nav-item" data-restricted="true">
+                <div class="nav-icon">🎪</div>
+                <span>Actividades</span>
+            </a>
+
+            <a href="#" class="nav-item" data-restricted="true">
+                <div class="nav-icon">🚗</div>
+                <span>Autos</span>
+            </a>
+        </nav>
+    </header>
+
+    <!-- Modal (copiado EXACTO) -->
+    <div class="ds-modal" id="ds-restricted-modal" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="ds-modal__box" role="document">
+        <button class="ds-close" id="ds-modal-close" aria-label="Cerrar">✖</button>
+        <div class="ds-modal__title">⚠️ Aviso</div>
+        <div class="ds-modal__text">
+          Esta página solo aplica para promociones de <strong>vuelos</strong>.<br>
+          Para paquetes y más, visita nuestra página principal.
+        </div>
+        <div>
+          <button id="ds-modal-redirect" class="ds-btn">Ir a la página principal</button>
+          <button id="ds-modal-cancel" class="ds-btn ds-btn--ghost">Volver</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content (BUSCADOR = igual que index) -->
+    <main class="main-content">
+        <div class="floating-elements">
+            <div class="balloon balloon1"></div>
+            <div class="balloon balloon2"></div>
+            <div class="anniversary-text">ANIVER<br>SARIO</div>
+        </div>
+
+        <div class="search-container">
+            <h1 class="page-title">Paquetes turísticos</h1>
+
+            <form class="search-form" id="search-form" onsubmit="return false;">
+                <div class="form-group autocomplete-container">
+                    <label class="form-label">ORIGEN</label>
+                    <input type="text" id="origin-input" class="form-input" placeholder="Escribe tu ciudad de origen..." autocomplete="off">
+                    <div id="origin-suggestions" class="suggestions"></div>
+                </div>
+
+                <button type="button" class="swap-btn" id="swap-btn">⇄</button>
+
+                <div class="form-group autocomplete-container">
+                    <label class="form-label">DESTINO</label>
+                    <input type="text" id="destination-input" class="form-input" placeholder="Escribe tu destino..." autocomplete="off">
+                    <div id="destination-suggestions" class="suggestions"></div>
+                </div>
+
+                <!-- FECHAS -->
+                <div class="form-group">
+                    <label class="form-label">FECHAS</label>
+                    <input type="text" id="daterange" class="form-input" placeholder="Entrada - Salida" readonly>
+                </div>
+
+                <!-- PASAJEROS -->
+                    <div class="form-group" style="position: relative;">
+                    <label class="form-label">PASAJEROS</label>
+                    <input type="text" id="passengers-input" class="form-input"  readonly>
+                    <div id="passengers-dropdown" style="display:none; position:absolute; background:white; border:1px solid #ccc; border-radius:8px; padding:15px; margin-top:5px; z-index:2000; width:260px;">
+                        
+                        <div class="counter-row">
+                            <span>Adultos</span>
+                            <div style="display:flex; gap:8px; align-items:center;">
+                                <button type="button" class="btn-minus" data-type="adults">−</button>
+                                <span id="adults-count">2</span>
+                                <button type="button" class="btn-plus" data-type="adults">+</button>
+                            </div>
+                        </div>
+
+                        <div class="counter-row">
+                            <span>Niños</span>
+                            <div style="display:flex; gap:8px; align-items:center;">
+                                <button type="button" class="btn-minus" data-type="children">−</button>
+                                <span id="children-count">0</span>
+                                <button type="button" class="btn-plus" data-type="children">+</button>
+                            </div>
+                        </div>
+
+                        <button type="button" id="apply-passengers" style="margin-top:12px; padding:7px 12px; background:#6b46c1; color:white; border:none; border-radius:6px; cursor:pointer;">Aplicar</button>
+                    </div>
+                    </div>
+
+
+
+                <button type="button" class="search-btn" id="search-btn">🔍 Buscar</button>
+
+            </form>
+        </div>
+    </main>
+
+    <!-- Promotional Cards + aquí agregamos la grilla de resultados (según lo pediste) -->
+    <section class="promo-section">
+        <div class="promo-grid">
+            <div class="promo-card coupons">
+                <div class="promo-title">Cupones de hasta</div>
+                <div class="promo-amount">$500.000</div>
+                <div class="promo-subtitle">para tus próximas vacaciones</div>
+                <div class="coupon-code">CUPON500</div>
+            </div>
+
+            <div class="promo-card caribbean">
+                <div class="promo-title">Caribe con todo incluido</div>
+                <div class="promo-subtitle">Reserva tu viaje completo</div>
+                <div class="promo-discount-text">Hasta 40% OFF</div>
+                <div class="gift-icon">🎁</div>
+            </div>
+
+            <div class="promo-card discount">
+                <div class="promo-title">Ofertas Exclusivas</div>
+                <div class="promo-subtitle">Solo por tiempo limitado</div>
+                <a href="#" class="promo-btn">Ver más</a>
+            </div>
+
+            <div class="promo-card brazil">
+                <div class="promo-title">Viaja a Brasil</div>
+                <div class="promo-subtitle">Descubre Río y más</div>
+                <div class="promo-discount-text">Hasta 30% OFF</div>
+                <div class="flag-icon flag-brazil"></div>
+            </div>
+        </div>
+
+        <!-- ---------- AQUÍ INSERTAMOS LA GRILLA DE RESULTADOS (dentro de la sección de promociones) ---------- -->
+        <div class="results-container" id="results-container" style="display:none;">
+            <div class="results-header">
+                <div class="summary" id="results-summary">✈️ </div>
+                <div class="actions">
+                    <!-- Un botón rápido para ordenar o filtrar (placeholder) -->
+                    <button id="refresh-btn" class="promo-btn" style="background:#6b46c1; padding:8px 12px; border-radius:8px;">Actualizar búsqueda</button>
+                </div>
+            </div>
+
+            <div class="results-grid" id="results-grid">
+                <!-- cards generadas por JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Litepicker JS (antes de nuestro script) -->
+    <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
+
+    <script>
+        // --- Mantengo tu array de ciudades exactamente igual ---
+        const cities = [
+            { name: 'Bogotá', country: 'Colombia', code: 'BOG', flag: '🇨🇴' },
+            { name: 'Medellín', country: 'Colombia', code: 'MDE', flag: '🇨🇴' },
+            { name: 'Cartagena', country: 'Colombia', code: 'CTG', flag: '🇨🇴' },
+            { name: 'San Andres', country: 'Colombia', code: 'ADZ', flag: '🇨🇴' },
+            { name: 'Cali', country: 'Colombia', code: 'CLO', flag: '🇨🇴' },
+            { name: 'Santa Marta', country: 'Colombia', code: 'SMR', flag: '🇨🇴' },
+            { name: 'Cúcuta', country: 'Colombia', code: 'CUC', flag: '🇨🇴' },
+            { name: 'Riohacha', country: 'Colombia', code: 'RCH', flag: '🇨🇴' },
+        ];
+
+        // Función de autocompletar (igualmente a la del index, pero activando sugerencias solo cuando >= 3 caracteres)
+        function createCitySearch(inputElement, suggestionsElement) {
+            let currentFocus = -1;
+
+            inputElement.addEventListener('input', function() {
+                const value = this.value.trim().toLowerCase();
+                suggestionsElement.innerHTML = '';
+
+                // Requisito: mostrar coincidencias solo si el usuario escribió 3 o más caracteres
+                if (!value || value.length < 3) {
+                    suggestionsElement.classList.remove('show');
+                    this.classList.remove('with-suggestions');
+                    return;
+                }
+
+                const filteredCities = cities.filter(city =>
+                    city.name.toLowerCase().includes(value) ||
+                    city.country.toLowerCase().includes(value) ||
+                    city.code.toLowerCase().includes(value)
+                );
+
+                if (filteredCities.length === 0) {
+                    suggestionsElement.innerHTML = '<div class="no-results">No se encontraron resultados</div>';
+                } else {
+                    filteredCities.forEach(city => {
+                        const div = document.createElement('div');
+                        div.classList.add('suggestion-item');
+                        div.innerHTML = `
+                            <div class="city-icon">${city.flag}</div>
+                            <div class="city-info">
+                                <div class="city-name">${city.name} (${city.code})</div>
+                                <div class="city-country">${city.country}</div>
+                            </div>
+                        `;
+                        div.addEventListener('click', function() {
+                            inputElement.value = `${city.name} (${city.code})`;
+                            suggestionsElement.classList.remove('show');
+                            inputElement.classList.remove('with-suggestions');
+                        });
+                        suggestionsElement.appendChild(div);
+                    });
+                }
+
+                suggestionsElement.classList.add('show');
+                inputElement.classList.add('with-suggestions');
+                currentFocus = -1;
+            });
+
+            inputElement.addEventListener('keydown', function(e) {
+                let items = suggestionsElement.getElementsByClassName('suggestion-item');
+                if (e.key === 'ArrowDown') {
+                    currentFocus++;
+                    addActive(items);
+                } else if (e.key === 'ArrowUp') {
+                    currentFocus--;
+                    addActive(items);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (currentFocus > -1 && items[currentFocus]) {
+                        items[currentFocus].click();
+                    }
+                }
+            });
+
+            function addActive(items) {
+                if (!items) return;
+                removeActive(items);
+                if (currentFocus >= items.length) currentFocus = 0;
+                if (currentFocus < 0) currentFocus = items.length - 1;
+                items[currentFocus].classList.add('highlighted');
+            }
+
+            function removeActive(items) {
+                for (let item of items) { item.classList.remove('highlighted'); }
+            }
+
+            document.addEventListener('click', function(e) {
+                if (e.target !== inputElement) {
+                    suggestionsElement.classList.remove('show');
+                    inputElement.classList.remove('with-suggestions');
+                }
+            });
+        }
+
+        // --- Habitaciones popup (idéntico al index) ---
+        let adults = 2;
+        let children = 0;
+
+        // --- RUTINAS INICIALES Y MANEJO DE RESULTADOS ---
+        document.addEventListener('DOMContentLoaded', function() {
+            // inputs y sugerencias
+            const originInput = document.getElementById('origin-input');
+            const originSuggestions = document.getElementById('origin-suggestions');
+            const destinationInput = document.getElementById('destination-input');
+            const destinationSuggestions = document.getElementById('destination-suggestions');
+            const passengersInput = document.getElementById('passengers-input');
+
+            passengersInput.value = `${adults} Adulto(s), ${children} Niño(s)`;
+
+            createCitySearch(originInput, originSuggestions);
+            createCitySearch(destinationInput, destinationSuggestions);
+
+            // swap
+            const swapBtn = document.getElementById('swap-btn');
+            swapBtn.addEventListener('click', function() {
+                const temp = originInput.value;
+                originInput.value = destinationInput.value;
+                destinationInput.value = temp;
+            });
+
+            // Litepicker
+            const picker = new Litepicker({
+                element: document.getElementById('daterange'),
+                singleMode: false,
+                format: 'DD/MM/YYYY',
+                minDate: new Date(),
+                numberOfMonths: 2,
+                numberOfColumns: 2,
+                lang: 'es'
+            });
+
+            // Habitaciones popup DOM references
+                const passengersDropdown = document.getElementById('passengers-dropdown');
+                const adultsCountEl = document.getElementById('adults-count');
+                const childrenCountEl = document.getElementById('children-count');
+                const applyPassengers = document.getElementById('apply-passengers');
+
+
+            adultsCountEl.textContent = adults;
+            childrenCountEl.textContent = children;
+
+                passengersInput.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    passengersDropdown.style.display =
+                        passengersDropdown.style.display === 'none' || passengersDropdown.style.display === ''
+                            ? 'block'
+                            : 'none';
+                    adultsCountEl.textContent = adults;
+                    childrenCountEl.textContent = children;
+                });
+
+
+
+            document.querySelectorAll('.btn-plus').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const type = btn.dataset.type;
+                    if (type === 'adults') adults++;
+                    else children++;
+                    adultsCountEl.textContent = adults;
+                    childrenCountEl.textContent = children;
+                });
+            });
+
+            document.querySelectorAll('.btn-minus').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const type = btn.dataset.type;
+                    if (type === 'adults' && adults > 1) adults--;
+                    if (type === 'children' && children > 0) children--;
+                    adultsCountEl.textContent = adults;
+                    childrenCountEl.textContent = children;
+                });
+            });
+
+                applyPassengers.addEventListener('click', () => {
+                    const total = adults + children;
+                    passengersInput.value = `${total} Pasajero(s) (${adults} Adulto(s), ${children} Niño(s))`;
+                    passengersDropdown.style.display = 'none';
+                });
+
+                        document.addEventListener('click', (e) => {
+                    if (!passengersDropdown.contains(e.target) && e.target !== passengersInput) {
+                        passengersDropdown.style.display = 'none';
+                    }
+                });
+
+            // rellenar inputs desde query string si vienen (cuando venimos del index)
+            const params = new URLSearchParams(window.location.search);
+            const origenParam = params.get('origen') || '';
+            const destinoParam = params.get('destino') || '';
+            const fechasParam = params.get('fechas') || '';
+            const pasajerosParam = params.get('pasajeros') || '';
+
+            if (origenParam) originInput.value = origenParam;
+            if (destinoParam) destinationInput.value = destinoParam;
+            if (fechasParam) document.getElementById('daterange').value = fechasParam;
+            if (pasajerosParam) document.getElementById('passengers-input').value = pasajerosParam;
+
+            // Si ya vienen origen+destino mostramos resultados automáticamente
+                    if (origenParam && destinoParam && fechasParam) {
+                renderResults(origenParam, destinoParam, fechasParam, pasajerosParam);
+            }
+            // manejo del botón buscar (en la propia página de resultados debe permitir nueva búsqueda)
+            document.getElementById('search-btn').addEventListener('click', function() {
+                buscarDesdeResultados();
+            });
+
+            // refrescar (ejemplo) - re-ejecuta búsqueda con los valores actuales
+            document.getElementById('refresh-btn').addEventListener('click', function() {
+                const o = originInput.value.trim();
+                const d = destinationInput.value.trim();
+                const f = document.getElementById('daterange').value.trim();
+                const h = document.getElementById('passengers-input').value.trim();
+                if (!o || !d || !f) { alert('Por favor completa origen, destino y fechas.'); return; }
+                // actualizar URL sin recargar
+                const newUrl = `${window.location.pathname}?origen=${encodeURIComponent(o)}&destino=${encodeURIComponent(d)}&fechas=${encodeURIComponent(f)}&pasajeros=${encodeURIComponent(h)}`;
+
+                history.replaceState({}, '', newUrl);
+                renderResults(o, d, f, h);
+            });
+
+            // Modal nav items (idéntico al index)
+            (function(){
+                const modal = document.getElementById('ds-restricted-modal');
+                const btnClose = document.getElementById('ds-modal-close');
+                const btnCancel = document.getElementById('ds-modal-cancel');
+                const btnRedirect = document.getElementById('ds-modal-redirect');
+                const externalUrl = 'https://www.despegar.com.co';
+
+                document.querySelectorAll('.nav-menu .nav-item').forEach(el => {
+                  el.addEventListener('click', function(e){
+                    if (el.classList.contains('active')) return;
+                    e.preventDefault();
+                    modal.style.display = 'flex';
+                    modal.setAttribute('aria-hidden','false');
+                  });
+                });
+                function closeModal() { modal.style.display = 'none'; modal.setAttribute('aria-hidden','true'); }
+                btnClose.addEventListener('click', closeModal);
+                btnCancel.addEventListener('click', closeModal);
+                btnRedirect.addEventListener('click', function(){ window.open(externalUrl, '_blank'); });
+                modal.addEventListener('click', function(e){ if (e.target === modal) closeModal(); });
+                document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && modal.style.display === 'flex') closeModal(); });
+            })();
+        });
+
+        // --- Buscar desde resultados (se mantiene la misma validación que el index,
+        // pero en vez de redirigir, actualizamos URL y re-renderizamos la grilla) ---
+        function buscarDesdeResultados() {
+    const origen = document.getElementById('origin-input').value.trim();
+    const destino = document.getElementById('destination-input').value.trim();
+    const fechas = document.getElementById('daterange').value.trim();
+    const pasajeros = document.getElementById('passengers-input').value.trim();
+
+    if (!origen || !destino || !fechas) {
+        alert("Por favor completa origen, destino y fechas.");
+        return;
+    }
+
+    // actualizar la URL para mantener coherencia
+    const newUrl = `${window.location.pathname}?origen=${encodeURIComponent(origen)}&destino=${encodeURIComponent(destino)}&fechas=${encodeURIComponent(fechas)}&pasajeros=${encodeURIComponent(pasajeros)}`;
+    history.replaceState({}, '', newUrl);
+
+    // renderizar resultados
+    renderResults(origen, destino, fechas, pasajeros);
+}
+
+
+        // --- función para renderizar la grilla de resultados (simulada) ---
+        // ...existing code...
+function renderResults(origen, destino, fechas, pasajeros) {
+    const container = document.getElementById('results-container');
+    const grid = document.getElementById('results-grid');
+    const summary = document.getElementById('results-summary');
+
+    container.style.display = 'block';
+    summary.textContent = `✈️ ${origen} → ${destino} · ${fechas} · ${pasajeros || ''}`;
+
+    // Eliminar mensajes anteriores si existen
+    const oldPromo = document.getElementById("promo-msg");
+    if (oldPromo) oldPromo.remove();
+
+    // Mensaje comercial atractivo
+    const promoMsg = document.createElement("div");
+    promoMsg.id = "promo-msg";
+    promoMsg.innerHTML = `
+        <div style="
+            background: linear-gradient(90deg, #ff4757, #ff6b81);
+            color: white;
+            padding: 12px 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        ">
+            🚀 ¡Atención viajero! Solo estás viendo vuelos que aplican para nuestra <span style="color: #ffe066;">Promo Especial 🔥</span>.  
+            Aprovecha estas tarifas únicas antes de que se agoten ✈️
+        </div>
+    `;
+    summary.insertAdjacentElement("afterend", promoMsg);
+
+    // Logos de aerolíneas
+    const airlineLogos = {
+        'Avianca': 'img/iconos/avianca.png',
+        'LATAM': 'img/iconos/latam.png',
+        'JetSmart': 'img/iconos/jet.png',
+        'Wingo': 'img/iconos/wingo.png'
+    };
+
+    // Generar vuelos dinámicos
+    const [fechaInicioStr, fechaFinStr] = fechas.split(" - ");
+    const fechaInicio = fechaInicioStr ? new Date(fechaInicioStr.split("/").reverse().join("-")) : new Date();
+    const fechaFin = fechaFinStr ? new Date(fechaFinStr.split("/").reverse().join("-")) : new Date(fechaInicio);
+
+    function generarHora(baseHora, baseMinuto, extraMinutos) {
+    const salida = new Date();
+    salida.setHours(baseHora, baseMinuto, 0, 0);
+
+    const llegada = new Date(salida.getTime() + extraMinutos * 60000);
+
+    const hSalida = String(salida.getHours()).padStart(2, "0");
+    const mSalida = String(salida.getMinutes()).padStart(2, "0");
+
+    const hLlegada = String(llegada.getHours()).padStart(2, "0");
+    const mLlegada = String(llegada.getMinutes()).padStart(2, "0");
+
+    return {
+        depart: `${hSalida}:${mSalida}`,
+        arrive: `${hLlegada}:${mLlegada}`,
+        duration: `${Math.floor(extraMinutos / 60)}h ${extraMinutos % 60}m`
+    };
+}
+
+function generarVuelos(origen, destino, fechaInicio, fechaFin) {
+    const aerolineas = ["Avianca", "LATAM", "JetSmart", "Wingo"];
+    const vuelos = [];
+
+    if (!fechaInicio || !fechaFin) return vuelos;
+
+    for (let i = 0; i < 6; i++) {
+        const airline = aerolineas[Math.floor(Math.random() * aerolineas.length)];
+
+        // --- FECHA DE IDA ---
+        const ida = new Date(fechaInicio);
+        if (Math.random() < 0.3) { // 30% probabilidad
+            ida.setDate(ida.getDate() + 1);
+        }
+
+        // --- FECHA DE VUELTA ---
+        const vuelta = new Date(fechaFin);
+        if (Math.random() < 0.3) { // 30% probabilidad
+            vuelta.setDate(vuelta.getDate() - 1);
+        }
+
+        // 🔒 Validación: si la ida queda después de la vuelta, lo saltamos
+        if (ida > vuelta) continue;
+
+        // Hora salida entre 6:00 y 18:00
+        const horaSalidaIda = 6 + Math.floor(Math.random() * 12);
+        const minutoSalidaIda = Math.random() > 0.5 ? 0 : 30;
+
+        const horaSalidaVuelta = 6 + Math.floor(Math.random() * 12);
+        const minutoSalidaVuelta = Math.random() > 0.5 ? 0 : 30;
+
+        // Duraciones aleatorias (1h30–3h30)
+        const duracionIda = 90 + Math.floor(Math.random() * 120);
+        const duracionVuelta = 90 + Math.floor(Math.random() * 120);
+
+        const vueloIda = generarHora(horaSalidaIda, minutoSalidaIda, duracionIda);
+        const vueloVuelta = generarHora(horaSalidaVuelta, minutoSalidaVuelta, duracionVuelta);
+
+        const price = 120000;
+
+        vuelos.push({
+            airline,
+            from: origen,
+            to: destino,
+            dateIda: ida.toLocaleDateString("es-CO"),
+            dateVuelta: vuelta.toLocaleDateString("es-CO"),
+            departIda: vueloIda.depart,
+            arriveIda: vueloIda.arrive,
+            departVuelta: vueloVuelta.depart,
+            arriveVuelta: vueloVuelta.arrive,
+            durationIda: vueloIda.duration,     // 👍 duración de la ida
+            durationVuelta: vueloVuelta.duration, // 👍 duración de la vuelta
+            price
+        });
+
+    }
+
+    return vuelos;
+}
+
+
+
+
+
+    const vuelos = generarVuelos(origen, destino, fechaInicio, fechaFin);
+
+    grid.innerHTML = ''; // limpiar resultados anteriores
+
+    vuelos.forEach(f => {
+        const card = document.createElement("div");
+        card.classList.add("flight-card");
+
+        card.innerHTML = `
+            <div class="flight-left">
+                <div class="airline-logo">
+                    ${airlineLogos[f.airline] 
+                        ? `<img src="${airlineLogos[f.airline]}" alt="${f.airline}" style="max-width:100%; max-height:100%;">`
+                        : f.airline.charAt(0)
+                    }
+                </div>
+                <div class="flight-info">
+                    <h3 style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                        ${f.airline} 
+                        <span style="background:#ff4757; color:white; font-size:11px; padding:2px 6px; border-radius:8px; font-weight:bold;">
+                            Ida y vuelta
+                        </span>
+                        <img src="img/iconos/fuego.gif" alt="Hot" style="width:18px; height:18px;">
+                    </h3>
+                    <p style="color:#1d4ed8; margin:4px 0;">
+                        <i class="fa-solid fa-plane-departure" style="margin-right:6px;"></i>
+                        <strong>Ida:</strong> ${f.from} → ${f.to}<br>
+                        ${f.dateIda} · ${f.departIda} → ${f.arriveIda}
+                    </p>
+                    <p style="color:#16a34a; margin:4px 0;">
+                        <i class="fa-solid fa-plane-arrival" style="margin-right:6px;"></i>
+                        <strong>Vuelta:</strong> ${f.to} → ${f.from}<br>
+                        ${f.dateVuelta} · ${f.departVuelta} → ${f.arriveVuelta}
+                    </p>
+                </div>
+            </div>
+            <div class="flight-right">
+                <div class="flight-price" style="text-align:right; margin-bottom:8px;">
+                    <strong style="color:#6b46c1; font-size:16px;">$${f.price.toLocaleString('es-CO')}</strong>
+                </div>
+            </div>
+        `;
+
+        // ✅ Agregar botón reservar con event listener
+        const btn = document.createElement("button");
+        btn.className = "btn-reserve";
+        btn.textContent = "Reservar";
+        btn.addEventListener("click", () => goToReserva(f));
+        card.querySelector(".flight-right").appendChild(btn);
+
+        grid.appendChild(card);
+    });
+
+    grid.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Función para ir a la página de reserva
+function goToReserva(flight) {
+    // Leer pasajeros de la caja de texto
+    const pasajerosText = document.getElementById("passengers-input").value.trim();
+    
+    // Extraer número de pasajeros (ejemplo: "3 Pasajero(s) (2 Adulto(s), 1 Niño(s))")
+    let totalPasajeros = 1;
+    const match = pasajerosText.match(/^(\d+)/);
+    if (match) totalPasajeros = parseInt(match[1]);
+
+    // Guardar vuelo con pasajeros
+    const flightWithPassengers = { ...flight, passengers: totalPasajeros };
+    localStorage.setItem("selectedFlight", JSON.stringify(flightWithPassengers));
+
+    // Redirigir
+    window.location.href = "reserva.html";
+}
+
+
+
+</script>
+
+
+  <!-- FOOTER (copiado EXACTO) -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-grid">
+        <div>
+          <h4>Mi Cuenta</h4>
+          <p>Conoce Pasaporte Despegar</p>
+          <p>Mis Viajes</p>
+          <p>Mi Perfil</p>
+          <p>Eliminar mi cuenta</p>
+        </div>
+        <div>
+          <h4>Somos Despegar</h4>
+          <p>Preguntas frecuentes</p>
+          <p>Ven a trabajar a Despegar</p>
+          <p>Registro Nacional de Turismo no. 31460</p>
+        </div>
+        <div>
+          <h4>Confianza en tus compras</h4>
+          <p>Términos y condiciones</p>
+          <p>Políticas de tratamiento de datos</p>
+          <p>Promociones vigentes</p>
+          <p>Condiciones IVA</p>
+          <p>Black Friday</p>
+          <p>Oferta Wow - Ver Términos y Condiciones</p>
+          <p>Capítulo 2. Sección 1.11</p>
+          <p>Prevención de fraudes</p>
+          <p>Despegar ft. SHAKIRA</p>
+        </div>
+        <div>
+          <h4>Potencia tu negocio</h4>
+          <p>Agrega tu flota</p>
+          <p>Programa de Agencias Afiliadas</p>
+          <p>Anuncia tu propiedad</p>
+          <p>Premium Connectivity Partner</p>
+          <br>
+          <label for="country-select"><strong>NAVEGAR EN EL SITIO DE:</strong></label><br>
+          <select id="country-select">
+            <option>Colombia</option>
+            <option>Argentina</option>
+            <option>Chile</option>
+            <option>México</option>
+            <option>Perú</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="footer-logos">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2d/IATAlogo.svg" alt="IATA">
+        <img src="https://www.anato.org/wp-content/uploads/2019/01/logo-anato.png" alt="Anato">
+      </div>
+
+      <div class="footer-legal">
+        <p><strong>Despegar está presente en</strong> Colombia, Argentina, Bolivia, Brasil, Chile, Costa Rica, Ecuador, 
+        El Salvador, Guatemala, Honduras, México, Nicaragua, Panamá, Paraguay, Perú, Puerto Rico, 
+        República Dominicana, Estados Unidos, Uruguay</p>
+
+        <p><strong>Despegar Colombia S.A.S – Despegar.com – NIT 900.610.518-5. – Calle 26 # 92 32 Oficina 202 Piso 2 Edificio Bts 3, Bogotá, Colombia. 
+        Todos los derechos reservados.</strong></p>
+
+        <p>Registro Nacional de Turismo no. 31460. Derechos de pasajero y/o deberes del transportador SIC – Superintendencia de Transporte – 
+        Consulta de Registro Nacional de Turismo – Derecho de retracto</p>
+
+        <p>En desarrollo de lo dispuesto en el artículo 17 de la Ley 679 de 2001, la agencia advierte al turista 
+        que la explotación y el abuso sexual de menores de edad en el país son sancionados penal y administrativamente, conforme a las leyes vigentes.</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
